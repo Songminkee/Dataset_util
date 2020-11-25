@@ -53,14 +53,14 @@ def move_file(args):
     print('Done!')
 
 if __name__=='__main__':
-    parser = argparse.ArgumentParser(description='Classifying specific IDs from Open Images Dataset V6 folders')
-    parser.add_argument('--id', type=str, help='', default='/m/025dyy')
-    parser.add_argument('--annotation_file', type=str, help='', default='/home/aiffel0042/Desktop/project/02.OBD,CD/object_dataset/oidv6-train-annotations-bbox.csv')
-    parser.add_argument('--image_folder', type=str, help='',
+    parser = argparse.ArgumentParser(description='Extracting specific IDs from Open Images Dataset V6 folders')
+    parser.add_argument('--id', type=str, help='id you want extract', default='/m/025dyy')
+    parser.add_argument('--annotation_file', type=str, help='oidv6-train-annotations-bbox.csv file path', default='/home/aiffel0042/Desktop/project/02.OBD,CD/object_dataset/oidv6-train-annotations-bbox.csv')
+    parser.add_argument('--image_folder', type=str, help='folder of data image',
                         default='/home/aiffel0042/Desktop/project/02.OBD,CD/object_dataset/train_1')
-    parser.add_argument('--dst_img_folder', type=str, help='',
+    parser.add_argument('--dst_img_folder', type=str, help='image folder you want save',
                         default='/home/aiffel0042/Desktop/project/02.OBD,CD/object_dataset/box_img')
-    parser.add_argument('--dst_label_foler', type=str, help='',
+    parser.add_argument('--dst_label_foler', type=str, help='label folder you want save',
                         default='/home/aiffel0042/Desktop/project/02.OBD,CD/object_dataset/labels')
 
     args = parser.parse_args()

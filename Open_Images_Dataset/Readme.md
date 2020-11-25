@@ -16,7 +16,7 @@
 ## Extracting specific IDs from Open Images Dataset V6 folders for Detection
 
 ```
-python Open_Images_Dataset/select_di.py --id [id you want] --annotation_file[oidv6-train-annotations-bbox.csv fil path] --image_folder [folder of data image] --dst_img_folder [image folder you want save] --dst_label_folder [label folder you want save]
+python Open_Images_Dataset/select_di.py --id [id you want] --annotation_file[oidv6-train-annotations-bbox.csv file path] --image_folder [folder of data image] --dst_img_folder [image folder you want save] --dst_label_folder [label folder you want save]
 ```
 
 
