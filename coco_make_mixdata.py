@@ -106,7 +106,7 @@ def affine_front(img,masks,ann,t_w,t_h,rot,s,is_visualize=False):
     masks = cv2.warpAffine(masks, M[:2], dsize=(512,512), flags=cv2.INTER_LINEAR, borderValue=(0, 0, 0))
 
     new_ann =copy.deepcopy(ann) #.copy()
-    print("pre_ann",[a['bbox'] for a in ann])
+    
     for info in new_ann:
 
         # calculate new box
@@ -133,8 +133,7 @@ def affine_front(img,masks,ann,t_w,t_h,rot,s,is_visualize=False):
             seg =  list(seg[:2].transpose().reshape(-1).clip(0,511))
             n_seg.append(seg)
         info['segmentation'] = n_seg
-    print("post_ann",[a['bbox'] for a in ann])
-    print("new",[a['bbox'] for a in new_ann])
+
     # for debug
     if is_visualize:
         view_img = img.copy()
@@ -180,7 +179,7 @@ def make_mix_data(args):
     idx2name = {i : c for i,c in enumerate(classes)}
 
     exit_flag=False
-    is_remove = False
+    is_remove = args.is_remove
 
     now_ann_id = len(coco.getAnnIds())
     now_image_id = len(coco.getImgIds())
@@ -192,7 +191,7 @@ def make_mix_data(args):
 
     while not exit_flag:
         user_input = input(f'Input { [c for c in classes]} or 0~10  exit=q : ')
-        print(user_input)
+        
         if user_input in name2idx.keys():
             cate_idx = name2idx[user_input]
         elif user_input =='q':
@@ -203,7 +202,7 @@ def make_mix_data(args):
             except:
                 print("input is wrong!")
                 continue
-        
+        print(f"Your selection is {idx2name[cate_idx]}")
         exit_flag=True
         
         cate_idxs = get_cate_idx(coco,cate_idx)
@@ -217,17 +216,10 @@ def make_mix_data(args):
             is_add = False
 
         front_img, front_ann, masks = load_front(coco,cate_idxs[front_id],data_root,cate_idx)
-        now_front, now_front_ann, now_masks = affine_front(front_img,masks,front_ann,t_w,t_h,rot,s,True)
+        now_front, now_front_ann, now_masks = affine_front(front_img,masks,front_ann,t_w,t_h,rot,s,False)
 
         syn_img, syn_view_img = synthesis_img(back_img, back_view_img, now_front, now_masks)
         while True:
-            print("front")
-            print([ann['bbox'] for ann in front_ann])
-            print("back")
-            print([ann['bbox'] for ann in back_ann])
-            print("now_front_ann")
-            print([ann['bbox'] for ann in now_front_ann])
-
             print("---------------------key infor mation----------------------")
             print("[8456] : translate, [79] : adjust translate scale, [+-] : object scale\n[r] : rotation, [df] : select back img, [cv] : select object img\n[s] : save, [q] : exit, [a] : now image to back img, [o] : set default")
             print("-"*30)
@@ -350,6 +342,7 @@ if __name__ == '__main__':
     parser.add_argument('-j','--json_name',              type=str,   help='Name of json file', default='train_all.json')
     parser.add_argument('-s','--synthesis_folder',              type=str,   help='Folder of result images', default='synthesis')
     parser.add_argument('-o','--out_json_name',              type=str,   help='Name of json file', default='train_synthesis_all.json')
+    parser.add_argument('-r','--is_remove',              action='store_true',   help='Remove first background ann')
     args = parser.parse_args()
 
     make_mix_data(args)
