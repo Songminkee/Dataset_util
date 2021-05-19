@@ -9,6 +9,17 @@ import sys
 import copy
 import glob
 
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(NpEncoder, self).default(obj)
+
 color = [(0,0,0), (255,255,0), (0,255,0), (0,0,255),
      (0,255,255), (255,0,255), (128,0,255),(128,128,128),
     (255,128,0),(0,255,128),(255,0,0)]
@@ -130,7 +141,7 @@ def affine_front(img,masks,ann,t_w,t_h,rot,s,is_visualize=False):
             seg = np.array(seg).reshape(-1,2)
             seg = np.concatenate([seg,np.ones((seg.shape[0],1))],-1)
             seg = np.matmul(M,seg.transpose())
-            seg =  list(seg[:2].transpose().reshape(-1).clip(0,511))
+            seg =  list(np.int32(seg)[:2].transpose().reshape(-1).clip(0,511))
             n_seg.append(seg)
         info['segmentation'] = n_seg
 
@@ -253,7 +264,7 @@ def make_mix_data(args):
                 break
             elif key==ord('s'):
                 num = len(glob.glob(synthesis_path+'/*.jpg'))
-                print(syn_img.dtype)
+                
                 cv2.imwrite(os.path.join(synthesis_path,f'{num:04d}.jpg'),syn_img)
                 new_json['images'].append({'license': 0,
                     'url': None,
@@ -261,17 +272,16 @@ def make_mix_data(args):
                     'height': 512,
                     'width': 512,
                     'date_captured': None,
-                    'id': now_ann_id})
+                    'id': now_image_id})
                 
                 new_ann = back_ann + now_front_ann
                 for i in range(len(new_ann)):
                     new_ann[i]['id'] = now_ann_id
-                    new_ann[i]['image_id'] = now_ann_id
+                    new_ann[i]['image_id'] = now_image_id
                     now_ann_id += 1
-                now_ann_id+=1
-
-                new_json['annotations'].append(new_ann)
-
+                now_image_id +=1
+                new_json['annotations'].extend(new_ann)
+                print(f"saved image id ={now_image_id-1}, ann id = {now_ann_id-1}")
                 print(f'{synthesis_folder}/{num:04d}.jpg saved!')
             elif key==ord('d'):
                 if back_id == 0:
@@ -331,7 +341,7 @@ def make_mix_data(args):
 
     print('Make json.....')
     with open(os.path.join(data_root,args.out_json_name), 'w', encoding='utf-8') as f:
-        json.dump(new_json, f, indent="\t")
+        json.dump(new_json, f, indent="\t",cls=NpEncoder)
     print(f'{os.path.join(data_root,args.out_json_name)} saved!')
 
 
