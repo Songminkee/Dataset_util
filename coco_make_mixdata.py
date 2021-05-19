@@ -176,7 +176,15 @@ def make_mix_data(args):
     with open(os.path.join(data_root,json_name), 'r') as f:
         ori_json = json.load(f)
 
-    new_json = ori_json.copy()
+    # dict_keys(['info', 'licenses', 'images', 'categories', 'annotations'])
+    if args.is_new:
+        new_json = dict()
+        for k in ['info','licenses','categories']:
+            new_json[k] = ori_json[k]
+        new_json['images'] = []
+        new_json['annotations'] = []
+    else:
+        new_json = ori_json.copy()
 
     if not os.path.exists(os.path.join(data_root,synthesis_folder)):
         os.makedirs(os.path.join(data_root,synthesis_folder))
@@ -192,8 +200,8 @@ def make_mix_data(args):
     exit_flag=False
     is_remove = args.is_remove
 
-    now_ann_id = len(coco.getAnnIds())
-    now_image_id = len(coco.getImgIds())
+    now_ann_id = 0 if args.is_new else len(coco.getAnnIds())
+    now_image_id = 0 if args.is_new else len(coco.getImgIds())
     back_id,front_id = 0,0
 
     t_scale = 10
@@ -349,10 +357,11 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Make mix dataset')
     parser.add_argument('-d','--data_root',              type=str,   help='Root path of json and images', default='input/data')
-    parser.add_argument('-j','--json_name',              type=str,   help='Name of json file', default='train_all.json')
-    parser.add_argument('-s','--synthesis_folder',              type=str,   help='Folder of result images', default='synthesis')
-    parser.add_argument('-o','--out_json_name',              type=str,   help='Name of json file', default='train_synthesis_all.json')
+    parser.add_argument('-j', '--json_name',              type=str,   help='Name of json file', default='train_all.json')
+    parser.add_argument('-s','--synthesis_folder',              type=str,   help='Folder of result images', default='synthesis_song')
+    parser.add_argument('-o','--out_json_name',              type=str,   help='Name of json file', default='train_synthesis_song_all.json')
     parser.add_argument('-r','--is_remove',              action='store_true',   help='Remove first background ann')
+    parser.add_argument('-n','--is_new',              action='store_true',   help='Remove first background ann')
     args = parser.parse_args()
 
     make_mix_data(args)
